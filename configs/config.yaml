@@ -1,0 +1,29 @@
+bev:
+  map_size: 320
+  resolution: 0.2       # m/pixel
+  max_path_dist: 30.0   # VALOR path 최대 거리 (m)
+
+model:
+  in_channels: 4
+  pretrained: false
+
+training:
+  epochs: 100
+  batch_size: 32
+  lr: 0.0001
+  lr_step: 30
+  lr_gamma: 0.5
+  train_ratio: 0.8
+  num_workers: 4
+  augment: true
+
+paths:
+  data_dir: data/raw
+  dataset: data/raw/dataset.pkl
+  checkpoint_dir: checkpoints
+  log_dir: logs
+
+ros:
+  waypoint_topic: /pa/waypoint
+  path_topic: /pa/best_path
+  speed_topic: /ego/speed
