@@ -1,0 +1,48 @@
+services:
+  ml-noetic-pc:
+    build:
+      context: .                  # 현재 docker-ML 디렉토리
+      dockerfile: Dockerfile
+    image: ml-noetic:pc
+    container_name: ml-noetic-pc
+
+    # 호스트와 같은 네트워크 네임스페이스 사용(ROS 통신 편의)
+    network_mode: host
+    gpus: all
+
+    # GPU 전달 (NVIDIA 4050)
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=graphics,utility,compute
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+
+      # 🔽 하이브리드(AMD+iGPU + NVIDIA dGPU)에서 NVIDIA 강제
+      - __NV_PRIME_RENDER_OFFLOAD=1
+      - __GLX_VENDOR_LIBRARY_NAME=nvidia
+      - __VK_LAYER_NV_optimus=NVIDIA_only
+      # 선택: Wayland 환경이면 같이 주는 게 안전
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/LearningByCheating_ws:/root/LearningByCheating_ws:rw
+      - /etc/localtime:/etc/localtime:ro
+      - ${HOME}/Downloads/MoraiLauncher_Lin:/mnt/MoraiLauncher_Lin:ro
+      # Wayland 소켓(선택, Ubuntu 기본이 Wayland면 추천)
+      - /run/user/${UID:-1000}:/run/user/${UID:-1000}
+
+    # (옵션) 웹캠/시리얼 쓸 거면 아래 주석 해제
+    # devices:
+    #   - /dev/video0:/dev/video0
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+
+    # /dev/shm 용량 부족시 GUI 충돌 방지
+    shm_size: "2gb"
+
+    stdin_open: true
+    tty: true
+    command: ["tail","-f","/dev/null"]
+
+    # 필요하면 재시작 정책 사용
+    # restart: unless-stopped
